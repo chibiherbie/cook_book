@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpRequest
 from .models import Recipe, RecipeProduct, Product
 
 
-WEIGHT = 10
+FILTER_MIN_WEIGHT = 10
 
 
 def add_product_to_recipe(request: HttpRequest, recipe_id: int, product_id: int, weight: int) -> HttpResponse:
@@ -26,7 +26,8 @@ def show_recipes_without_product(request: HttpRequest, product_id: int) -> HttpR
     product = get_object_or_404(Product, pk=product_id)
 
     recipes_without_product = Recipe.objects.exclude(recipeproduct__product=product)
-    recipes_with_low_quantity = Recipe.objects.filter(recipeproduct__product=product, recipeproduct__weight__lt=WEIGHT)
+    recipes_with_low_quantity = Recipe.objects.filter(recipeproduct__product=product,
+                                                      recipeproduct__weight__lt=MIN_WEIGHT)
 
     recipes = recipes_without_product.union(recipes_with_low_quantity)
 
