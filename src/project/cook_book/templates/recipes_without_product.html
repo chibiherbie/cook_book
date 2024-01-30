@@ -1,35 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Recipes Without Product</title>
+    <meta charset="UTF-8">
+    <title>Рецепт без продукта {{ product.name }} или с весом меньше 10гр</title>
 </head>
 <body>
-    <h2>Recipes Without Product</h2>
+    <h1>Рецепт без продукта "{{ product.name }}" или с весом меньше 10гр</h1>
     <table>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-        </tr>
-        {% for recipe in recipes_without_product %}
-        <tr>
-            <td>{{ recipe.id }}</td>
-            <td>{{ recipe.name }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <h2>Recipes With Low Quantity of Product</h2>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-        </tr>
-        {% for recipe in recipes_with_low_quantity %}
-        <tr>
-            <td>{{ recipe.id }}</td>
-            <td>{{ recipe.name }}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recipe in recipes %}
+                <tr>
+                    <td>{{ recipe.id }}</td>
+                    <td>{{ recipe.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>
