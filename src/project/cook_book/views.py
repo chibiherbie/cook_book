@@ -10,6 +10,10 @@ def add_product_to_recipe(request: HttpRequest, recipe_id: int, product_id: int,
     recipe = get_object_or_404(Recipe, pk=recipe_id)
     product = get_object_or_404(Product, pk=product_id)
 
+    # Проверка, что продукт с таким ID не включен в рецепт
+    if recipe.recipeproduct_set.filter(product=product).exists():
+        return HttpResponse(f'Продукт "{product.name}" уже есть в рецепте')
+
     recipe_product, created = RecipeProduct.objects.get_or_create(recipe=recipe, product=product)
 
     recipe_product.weight = weight
