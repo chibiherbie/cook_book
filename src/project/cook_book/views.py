@@ -27,7 +27,7 @@ def show_recipes_without_product(request: HttpRequest, product_id: int) -> HttpR
 
     recipes_without_product = Recipe.objects.exclude(recipeproduct__product=product)
     recipes_with_low_quantity = Recipe.objects.filter(recipeproduct__product=product,
-                                                      recipeproduct__weight__lt=MIN_WEIGHT)
+                                                      recipeproduct__weight__lt=FILTER_MIN_WEIGHT)
 
     recipes = recipes_without_product.union(recipes_with_low_quantity)
 
