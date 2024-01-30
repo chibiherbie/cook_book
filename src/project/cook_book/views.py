@@ -1,38 +1,38 @@
-from django.shortcuts import render
-from django.template import loader
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpRequest
 from .models import Recipe, RecipeProduct, Product
 
 
-def add_product_to_recipe(recipe_id, product_id, weight):
-    recipe = Recipe.objects.get(id=recipe_id)
-    product = Product.objects.get(id=product_id)
-    try:
-        recipe_product = RecipeProduct.objects.get(recipe=recipe, product=product)
-        recipe_product.weight = weight
-        recipe_product.save()
-    except RecipeProduct.DoesNotExist:
-        recipe.products.add(product, through_defaults={'weight': weight})
+WEIGHT = 10
 
 
-def show_recipes_without_product(request, product_id=1):
-    recipes_without_product = Recipe.objects.exclude(recipeproduct__product_id=product_id).distinct()
-    recipes_with_low_quantity = Recipe.objects.filter(recipeproduct__product_id=product_id,
-                                                      recipeproduct__weight__lt=10).distinct()
+def add_product_to_recipe(request: HttpRequest, recipe_id: int, product_id: int, weight: int) -> HttpResponse:
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    product = get_object_or_404(Product, pk=product_id)
 
-    template = loader.get_template('recipes_without_product.html')
-    context = {
-        'recipes_without_product': recipes_without_product,
-        'recipes_with_low_quantity': recipes_with_low_quantity,
-    }
+    recipe_product, created = RecipeProduct.objects.get_or_create(recipe=recipe, product=product)
 
-    return HttpResponse(template.render(context, request))
+    recipe_product.weight = weight
+    recipe_product.save()
+
+    return HttpResponse(f'Продукт "{product.name}" добавлен в рецепт "{recipe.name}" с весом {weight}гр')
 
 
-def cook_recipe(recipe_id):
-    recipe = Recipe.objects.get(id=recipe_id)
-    recipe_products = recipe.products.all()
-    for recipe_product in recipe_products:
-        product = recipe_product.product
-        product.times_used += 1
-        product.save()
+def show_recipes_without_product(request: HttpRequest, product_id: int) -> HttpResponse:
+    product = get_object_or_404(Product, pk=product_id)
+    recipes_without_product = Recipe.objects.exclude(recipeproduct__product=product) \
+                                           .filter(recipeproduct__weight__lt=WEIGHT)
+
+    context = {'product': product, 'recipes': recipes_without_product}
+    return render(request, 'recipes_without_product.html', context)
+
+
+def cook_recipe(request: HttpRequest, recipe_id: int) -> HttpResponse:
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+
+    # Увеличение количества приготовленных блюд для каждого продукта в рецепте
+    for recipe_product in recipe.recipeproduct_set.all():
+        recipe_product.product.count_used += 1
+        recipe_product.product.save()
+
+    return HttpResponse(f'Рецепт "{recipe.name}" приготовлен')
