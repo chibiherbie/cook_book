@@ -20,10 +20,13 @@ def add_product_to_recipe(request: HttpRequest, recipe_id: int, product_id: int,
 
 def show_recipes_without_product(request: HttpRequest, product_id: int) -> HttpResponse:
     product = get_object_or_404(Product, pk=product_id)
-    recipes_without_product = Recipe.objects.exclude(recipeproduct__product=product) \
-                                           .filter(recipeproduct__weight__lt=WEIGHT)
 
-    context = {'product': product, 'recipes': recipes_without_product}
+    recipes_without_product = Recipe.objects.exclude(recipeproduct__product=product)
+    recipes_with_low_quantity = Recipe.objects.filter(recipeproduct__product=product, recipeproduct__weight__lt=WEIGHT)
+
+    recipes = recipes_without_product.union(recipes_with_low_quantity)
+
+    context = {'product': product, 'recipes': recipes}
     return render(request, 'recipes_without_product.html', context)
 
 
