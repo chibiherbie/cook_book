@@ -3,7 +3,7 @@ from django.db import models
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
-    count_used = models.IntegerField()
+    count_used = models.IntegerField(default=0)
 
 
 class Recipe(models.Model):
